@@ -15,9 +15,11 @@ randomization <- read.csv(paste(data_folder,"randomization.csv", sep=''))
 data <- merge(merge(subject, efficacy, by = ("subject")),
 	 randomization, by = "subject")
 
-## 
+## normalize the nosebleeds
+data$nosebleeds_per_year <- data$nosebleeds / data$duration * 365
+data$y <- ifelse(data$nosebleeds <2, 1, 0)
 data$treatment <- ifelse(data$arm == 'ACTIVE', 1, 0)
- 
+data$mucus.band <-as.factor(ifelse(data$mucus.viscosity<2, 0, 1))
 
 ## Only keep those patients with duration > 300 days
 ## reduce the sample size from 444 to 398
@@ -92,34 +94,11 @@ glmnet_rslt5 <- cv.glmnet(x=X[,-1], y = data$nosebleeds, alpha=.5, family = 'poi
 
 glmnet_rslt$cvm[which(glmnet_rslt$lambda == glmnet_rslt$lambda.1se)]
 glmnet_rslt5$cvm[which(glmnet_rslt5$lambda == glmnet_rslt5$lambda.1se)]
-## variables selected using lambda.1se and alpha = .5 
+## variables selected using lambda.1se and alpha = 1 
 coef(glmnet_rslt, s = 'lambda.1se') 
-coeff <- coef(glmnet_rslt5, s = 'lambda.1se') 
 
-beta <- coeff[which(as.matrix(coeff)!=0)]
-var_select <- rownames(coeff)[which(as.matrix(coeff)!=0)] 
-var_select <- var_select[-1] ## remove intercept
+ 
 
 #########################################
 ## 3. Simulation
 #########################################
-
-source("./Simulation_fun.R")
-
-## sample size = 400, general population
-simulation_fun(n= 400, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
-
-## sample size = 400, mucus viscosity > 1.2
-simulation_fun(n= 400, mv_cond ="mucus.viscosity > 1.2", tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
-
-
-##
-simulation_fun(n= 800, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
-
-## sample size = 800, mucus viscosity > 1.2
-simulation_fun(n= 800, mv_cond ="mucus.viscosity > 1.2", tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
-
