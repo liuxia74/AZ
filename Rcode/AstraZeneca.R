@@ -1,5 +1,4 @@
-library(ggplot2)
-library(plyr)
+
 #######################
 ## 0. Load data
 #######################
@@ -79,7 +78,7 @@ tissue_rslt <- glm(nosebleeds ~ treatment * tissue.use, data=data, family = pois
 ##############################
 
 ###################################################################
-## 2.1. use Elastic Net (cross-validation) to do variable selection over the full model 
+## 2.1. use Elastic Net (with cross-validation) to do variable selection over the full model 
 ####################################################################
 library(glmnet)
 
@@ -100,26 +99,43 @@ beta <- coeff[which(as.matrix(coeff)!=0)]
 var_select <- rownames(coeff)[which(as.matrix(coeff)!=0)] 
 var_select <- var_select[-1] ## remove intercept
 
+
+## randomForest
+rf_rslt <- randomForest(nosebleeds ~ treatment  + mucus.viscosity + tissue.use + previous.year+ country + eye.colour, data=data, importance=TRUE,
+                        proximity=TRUE)
+
 #########################################
 ## 3. Simulation
 #########################################
 
 source("./Simulation_fun.R")
 
-## sample size = 400, general population
-simulation_fun(n= 400, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
+## sample size = 800, general population
+simulation_fun(n= 800, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05, 
+	Iter = 5000, hist_data = data, beta = beta, var = var_select)
 
-## sample size = 400, mucus viscosity > 1.2
-simulation_fun(n= 400, mv_cond ="mucus.viscosity > 1.2", tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
+## sample size = 800, mucus viscosity > 1.2
+simulation_fun(n= 800, mv_cond ="mucus.viscosity > 2", tissue_cond = NULL, alpha = 0.05, 
+	Iter = 5000, hist_data = data, beta = beta, var = var_select)
+
+## sample size = 800, tissue.use == 'MEDIUM'
+simulation_fun(n= 800, mv_cond = NULL, tissue_cond = "tissue.use== 'MEDIUM'", alpha = 0.05, 
+	Iter = 5000, hist_data = data, beta = beta, var = var_select)
 
 
 ##
-simulation_fun(n= 800, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
+simulation_fun(n= 3000, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05, 
+	Iter = 5000, hist_data = data, beta = beta, var = var_select)
 
-## sample size = 800, mucus viscosity > 1.2
-simulation_fun(n= 800, mv_cond ="mucus.viscosity > 1.2", tissue_cond = NULL, alpha = 0.05, 
-	Iter = 1000, hist_data = data, beta = beta, var = var_select)
+## sample size = 3000, mucus viscosity > 1.2
+simulation_fun(n= 3000, mv_cond ="mucus.viscosity > 1.2", tissue_cond = NULL, alpha = 0.05, 
+	Iter = 5000, hist_data = data, beta = beta, var = var_select)
+
+## sample size = 3000, tissue.use == 'MEDIUM'
+simulation_fun(n= 3000, mv_cond = NULL, tissue_cond = "tissue.use== 'MEDIUM'", alpha = 0.05, 
+	Iter = 5000, hist_data = data, beta = beta, var = var_select)
+
+## sample size = 2000, mucus viscosity > 1.5
+simulation_fun(n= 2000, mv_cond ="mucus.viscosity > 1.5", tissue_cond = NULL, alpha = 0.05, 
+	Iter = 5000, hist_data = data, beta = beta, var = var_select)
 

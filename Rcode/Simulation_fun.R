@@ -30,11 +30,12 @@ simulation_fun <- function(n, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05,
 	## Iteration
 	for(i in 1:Iter){
 
-		#Simulate Data
+		#Simulate Data from their empirical distribution with assumption that the variables are independent
 		simu_data <- NULL
 		simu_data$previous.year <- sample(as.numeric(names(dist_prev)), n, prob = as.vector(dist_prev), replace = TRUE)
 		simu_data$mucus.viscosity <- sample(as.numeric(names(dist_mv)), n, prob = as.vector(dist_mv), replace = TRUE)
 		simu_data$tissue.use <- sample( names(dist_tissue) , n, prob = as.vector(dist_tissue), replace = TRUE)
+		simu_data$tissue.use <-  factor(simu_data$tissue.use, levels = names(dist_tissue))
 		simu_data$country <- sample( names(dist_country) , n, prob = as.vector(dist_country), replace = TRUE)
 		simu_data$treatment <- sample( c(0,1) , n, prob = c(.5,.5), replace = TRUE)
 		simu_data <- as.data.frame(simu_data)
