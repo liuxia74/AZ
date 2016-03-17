@@ -23,8 +23,7 @@ simulation_fun <- function(n, mv_cond =NULL, tissue_cond = NULL, alpha = 0.05,
 	if(!is.null(tissue_cond))
 		dist_tissue <- prop.table(table(subset(hist_data, eval(parse(text=tissue_cond)))$tissue))
 	## In the statistical model, only country %in% c("D","E","F","H") are used
-	country <- ifelse(as.character(hist_data$country) %in% c("D","E","F","H"), as.character(hist_data$country), "A")
-	dist_country <- prop.table(table(country))
+	dist_country <- prop.table(table(hist_data$country))
 
 	p_value <- rep(NA, Iter)
 	## Iteration
